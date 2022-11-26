@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express')
 const cors = require('cors');
 const app = express()
@@ -25,6 +25,19 @@ async function run(){
         app.get('/users/:id', async(req, res)=>{
             const id =req.params.id;
             const serQuery={role:id}
+            const productCursor=UserCollection.find(serQuery)
+            const product=await productCursor.toArray()
+            res.send(product)
+        })
+        app.delete('/usersDelete/:id',async(req,res)=>{
+            const id =req.params.id;
+            const query ={_id:ObjectId(id)}
+            const result =await UserCollection.deleteOne(query)
+            res.send(result)
+        });
+        app.get('/myProfile/:id', async(req, res)=>{
+            const id =req.params.id;
+            const serQuery={email:id}
             const productCursor=UserCollection.find(serQuery)
             const product=await productCursor.toArray()
             res.send(product)
@@ -67,6 +80,26 @@ async function run(){
             const product=await productCursor.toArray()
             res.send(product)
         })
+        app.put('/updateProduct/:id', async(req, res)=>{
+            const id =req.params.id;
+            const filter={_id:ObjectId(id)}
+            const reviews=req.body;
+            console.log(reviews);
+            const option ={upsert:true}
+            const updateReview={
+                $set:{
+                    Status:reviews.Status,
+                }
+            }
+            const result= await ProductCollection.updateOne(filter, updateReview, option)
+            res.send(result)
+        })
+        app.delete('/productDelete/:id',async(req,res)=>{
+            const id =req.params.id;
+            const query ={_id:ObjectId(id)}
+            const result =await ProductCollection.deleteOne(query)
+            res.send(result)
+        });
         
     }finally{
 
