@@ -22,6 +22,13 @@ async function run(){
             const result= await UserCollection.insertOne(user)
             res.send(result); 
         })
+        app.get('/users/:id', async(req, res)=>{
+            const id =req.params.id;
+            const serQuery={role:id}
+            const productCursor=UserCollection.find(serQuery)
+            const product=await productCursor.toArray()
+            res.send(product)
+        })
         const CategoryCollection=db.collection('Category');
         app.post('/category', async(req, res) => {
             const category = req.body;
@@ -49,6 +56,13 @@ async function run(){
         app.get('/product/:id', async(req, res)=>{
             const id =req.params.id;
             const serQuery={category:id}
+            const productCursor=ProductCollection.find(serQuery)
+            const product=await productCursor.toArray()
+            res.send(product)
+        })
+        app.get('/myProduct/:id', async(req, res)=>{
+            const id =req.params.id;
+            const serQuery={email:id}
             const productCursor=ProductCollection.find(serQuery)
             const product=await productCursor.toArray()
             res.send(product)
