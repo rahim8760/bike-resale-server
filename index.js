@@ -100,6 +100,26 @@ async function run(){
             const result =await ProductCollection.deleteOne(query)
             res.send(result)
         });
+        // booking 
+        const bookingCollection=db.collection('Booking');
+        app.post('/booking', async(req, res) => {
+            const product = req.body;
+            const result= await bookingCollection.insertOne(product)
+            res.send(result); 
+        })
+        app.delete('/bookingDelete/:id',async(req,res)=>{
+            const id =req.params.id;
+            const query ={_id:ObjectId(id)}
+            const result =await bookingCollection.deleteOne(query)
+            res.send(result)
+        });
+        app.get('/myBooking/:id', async(req, res)=>{
+            const id =req.params.id;
+            const serQuery={byerEmail:id}
+            const productCursor=bookingCollection.find(serQuery)
+            const product=await productCursor.toArray()
+            res.send(product)
+        })
         
     }finally{
 
