@@ -120,6 +120,19 @@ async function run(){
             const product=await productCursor.toArray()
             res.send(product)
         })
+        app.get('/myBuyers/:id', async(req, res)=>{
+            const id =req.params.id;
+            const serQuery={sellerEmail:id}
+            const productCursor=bookingCollection.find(serQuery)
+            const product=await productCursor.toArray()
+            res.send(product)
+        })
+        app.delete('/myBuyers/:id',async(req,res)=>{
+            const id =req.params.id;
+            const query ={_id:ObjectId(id)}
+            const result =await bookingCollection.deleteOne(query)
+            res.send(result)
+        });
         
     }finally{
 
