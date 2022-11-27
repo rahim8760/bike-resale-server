@@ -133,6 +133,18 @@ async function run(){
             const result =await bookingCollection.deleteOne(query)
             res.send(result)
         });
+        const reportCollection=db.collection('Report');
+        app.post('/report', async(req, res) => {
+            const report = req.body;
+            const result= await reportCollection.insertOne(report)
+            res.send(result); 
+        })
+        app.get('/reports', async(req, res)=>{
+            const serQuery={}
+            const reportCursor=reportCollection.find(serQuery)
+            const report=await reportCursor.toArray()
+            res.send(report)
+        })
         
     }finally{
 
