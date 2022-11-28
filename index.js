@@ -1,5 +1,6 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express')
+const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const app = express()
 const port = process.env.Port || 5000;
@@ -13,14 +14,25 @@ app.use(express.json())
 const uri = `mongodb+srv://${process.env.USER_DB}:${process.env.PASSWORD_DB}@cluster0.scxie4k.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+
+    
 async function run(){
     try{
         const db=client.db('Bike_Resale')
         const UserCollection=db.collection('Users');
+        // jwt
+        
         app.post('/users', async(req, res) => {
             const user = req.body;
             const result= await UserCollection.insertOne(user)
             res.send(result); 
+        })
+        app.get('/currentUsers/:id', async(req, res)=>{
+            const id =req.params.id;
+            const serQuery={email:id}
+            const productCursor=UserCollection.find(serQuery)
+            const product=await productCursor.toArray()
+            res.send(product)
         })
         app.get('/users/:id', async(req, res)=>{
             const id =req.params.id;
@@ -42,6 +54,31 @@ async function run(){
             const product=await productCursor.toArray()
             res.send(product)
         })
+        app.put('/updateUser/:id', async(req, res)=>{
+            const id =req.params.id;
+            const filter={_id:ObjectId(id)}
+            const reviews=req.body;
+            console.log(reviews);
+            const option ={upsert:true}
+            const updateReview={
+                $set:{
+                    userStatus:reviews.Status,
+                }
+            }
+            const result= await UserCollection.updateOne(filter, updateReview, option)
+            res.send(result)
+        })
+        app.get('/jwt',async(req, res)=>{
+            const email=req.query.email;
+            const query={email:email}
+            const user=await UserCollection.findOne(query);
+            if(user){
+                const token=jwt.sign({email}, process.env.ACCESS_TOKEN,{expiresIn: '1h'})
+                return res.send({access_Token: token})
+        }
+            res.status(403).send({access_Token:''})
+        })
+        // jwt end
         const CategoryCollection=db.collection('Category');
         app.post('/category', async(req, res) => {
             const category = req.body;
@@ -62,6 +99,13 @@ async function run(){
         })
         app.get('/product', async(req, res)=>{
             const serQuery={}
+            const categoryCursor=ProductCollection.find(serQuery)
+            const category=await categoryCursor.toArray()
+            res.send(category)
+        })
+        app.get('/products/:id', async(req, res)=>{
+            const id =req.params.id;
+            const serQuery={Status:id}
             const productCursor=ProductCollection.find(serQuery)
             const product=await productCursor.toArray()
             res.send(product)
