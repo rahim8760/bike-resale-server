@@ -20,7 +20,7 @@ async function run(){
     try{
         const db=client.db('Bike_Resale')
         const UserCollection=db.collection('Users');
-        // jwt
+        
         
         app.post('/users', async(req, res) => {
             const user = req.body;
@@ -33,6 +33,19 @@ async function run(){
             const productCursor=UserCollection.find(serQuery)
             const product=await productCursor.toArray()
             res.send(product)
+        })
+        app.get('/users/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            const user = await UserCollection.findOne(query);
+            res.send({ isAdmin: user?.role === 'Admin' });
+        })
+        app.get('/users/admins/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email }
+            console.log(query);
+            const user = await UserCollection.find(query);
+            res.send({ isAdmin: user?.role === 'Seller' });
         })
         app.get('/users/:id', async(req, res)=>{
             const id =req.params.id;
@@ -68,16 +81,27 @@ async function run(){
             const result= await UserCollection.updateOne(filter, updateReview, option)
             res.send(result)
         })
-        app.get('/jwt',async(req, res)=>{
-            const email=req.query.email;
-            const query={email:email}
-            const user=await UserCollection.findOne(query);
-            if(user){
-                const token=jwt.sign({email}, process.env.ACCESS_TOKEN,{expiresIn: '1h'})
-                return res.send({access_Token: token})
-        }
-            res.status(403).send({access_Token:''})
-        })
+        // jwt
+
+
+        // app.get('/jwt',async(req, res)=>{
+        //     const email=req.query.email;
+        //     const query={email:email}
+        //     const user=await UserCollection.findOne(query);
+        //     if(user){
+        //         const token=jwt.sign({email}, process.env.ACCESS_TOKEN,{expiresIn: '1h'})
+        //         return res.send({access_Token: token})
+        // }
+        //     res.status(403).send({access_Token:''})
+        // })
+
+
+
+
+
+        
+
+
         // jwt end
         const CategoryCollection=db.collection('Category');
         app.post('/category', async(req, res) => {
@@ -183,7 +207,7 @@ async function run(){
             const result= await reportCollection.insertOne(report)
             res.send(result); 
         })
-        app.get('/reports', async(req, res)=>{
+        app.get('/report', async(req, res)=>{
             const serQuery={}
             const reportCursor=reportCollection.find(serQuery)
             const report=await reportCursor.toArray()
